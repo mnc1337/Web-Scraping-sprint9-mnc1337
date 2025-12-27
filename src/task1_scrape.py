@@ -35,7 +35,7 @@ def extract_title(soup):
     Returns:
         str: The title of the page.
     """
-    title = soup.find("title")
+    title = soup.find("h1", {"id": "firstHeading"})
     if title:
         result = title.get_text()
     else:
@@ -81,7 +81,7 @@ def save_to_json(data, filename):
 
 
 if __name__ == "__main__":
-    url = "http://localhost:5000"
+    url = "https://en.wikipedia.org/wiki/Web_scraping"
     page_content = fetch_wikipedia_page(url)
     soup = BeautifulSoup(page_content, 'html.parser')
 
