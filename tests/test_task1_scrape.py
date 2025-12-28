@@ -4,7 +4,6 @@ from bs4 import BeautifulSoup
 import json
 from src.task1_scrape import fetch_wikipedia_page, extract_title, extract_first_sentence, save_to_json
 
-
 def test_fetch_wikipedia_page(monkeypatch):
     # Mock response for the Wikipedia page
     class MockResponse:

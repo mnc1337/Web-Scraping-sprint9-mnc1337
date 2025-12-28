@@ -51,11 +51,11 @@ def generate_daily_report(analysis):
         f"Temperature: Max {analysis['max_temperature']}°C",
     ]
 
-    if analysis["max_temperature"] >= 10:
+    if analysis["max_temperature"] > 30:
         lines.append("It was a hot day.")
-    if analysis["wind_speed"] >= 15:
+    if analysis["wind_speed"] > 15:
         lines.append("It was a windy day.")
-    if analysis["humidity"] >= 70:
+    if analysis["humidity"] > 70:
         lines.append("The humidity made the day uncomfortable.")
     if analysis["precipitation"] > 0:
         lines.append("It was a rainy day.")
