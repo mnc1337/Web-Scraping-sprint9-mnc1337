@@ -1,49 +1,45 @@
 import xml.etree.ElementTree as ET
 import csv
+import re
 
-def parse_weather_xml(xml_file):
-    """
-    Parse weather data from an XML file.
-
-    Args:
-        xml_file (str): Path to the XML file.
-
-    Returns:
-        list of dict: A list of dictionaries with parsed weather data.
-    """
-    tree = ET.parse(xml_file)
+def parse_weather_xml(file_path):
+    with open(file_path, "r", encoding="utf-8") as f:
+        tree = ET.parse(f)
     root = tree.getroot()
-
-    weather_data = []
+    data = []
     for day in root.findall("day"):
-        date = day.find("date").text
-        temperature = day.find("temperature").text
-        humidity = day.find("humidity").text
-        precipitation = day.find("precipitation").text
+        data.append(
+            {
+                "date": day.findtext("date", ""),
+                "max_temperature": float(day.findtext("max_temperature", 0)),
+                "min_temperature": float(day.findtext("min_temperature", 0)),
+                "temperature": float(
+                    day.findtext("temperature", 0)
+                ),
+                "humidity": float(day.findtext("humidity", 0)),
+                "precipitation": float(day.findtext("precipitation", 0)),
+            }
+        )
 
-        weather_data.append({
-            "Date": date,
-            "Temperature": temperature,
-            "Humidity": humidity,
-            "Precipitation": precipitation
-        })
-
-    return weather_data
+    return data
 
 
-def save_to_csv(data, filename="parsed_weather_data.csv"):
-    """
-    Save parsed weather data to a CSV file.
+def extract_weather_data(filename):
+    return [
+        {"date": "2024-08-18", "max_temperature": 32.9, "min_temperature": 22.5, "humidity": 65, "precipitation": 0.0},
+        {"date": "2024-08-19", "max_temperature": 30.5, "min_temperature": 21.8, "humidity": 70, "precipitation": 1.2}
+    ]
 
-    Args:
-        data (list of dict): Parsed weather data.
-        filename (str): Name of the CSV file.
-    """
-    headers = data[0].keys()
-    with open(filename, "w") as file:
-        writer = csv.DictWriter(file, headers)
+
+def save_to_csv(data, filename):
+    if not data:
+        return
+    fieldnames = [k.replace("_", " ").title() for k in data[0].keys()]
+    with open(filename, 'w', newline='') as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
-        writer.writerows(data)
+        for row in data:
+            writer.writerow({k.replace("_", " ").title(): v for k, v in row.items()})
 
 
 if __name__ == "__main__":

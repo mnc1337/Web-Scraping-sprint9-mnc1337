@@ -1,92 +1,67 @@
 import json
 
-
-def load_json(filename):
-    """
-    Load JSON data from a file.
-
-    Args:
-        filename (str): The name of the JSON file to load.
-
-    Returns:
-        dict: The loaded JSON data.
-    """
-    with open(filename, "r") as file:
-        return json.load(file)
-
+def load_json(file_path):
+    """Load JSON data from a file."""
+    with open(file_path, 'r', encoding='utf-8') as f:
+        return json.load(f)
 
 def analyze_daily_weather(day):
-    """
-    Analyze weather data for a single day.
+    """Analyze a single day's weather and return a dictionary with analysis."""
+    max_temp = day.get("max_temperature", None)
+    min_temp = day.get("min_temperature", None)
+    precipitation = day.get("precipitation", 0.0)
+    wind_speed = day.get("wind_speed", 0.0)
+    humidity = day.get("humidity", 0.0)
+    temperature_swing = max_temp - min_temp if max_temp is not None and min_temp is not None else None
 
-    Args:
-        day (dict): The weather data for the day.
-
-    Returns:
-        dict: A dictionary with analysis results for the day.
-    """
     return {
         "date": day.get("date"),
-        "max_temperature": day.get("max_temperature"),
-        "wind_speed": day.get("wind_speed"),
-        "humidity": day.get("humidity"),
-        "precipitation": day.get("precipitation"),
-        "weather_description": day.get("weather_description"),
+        "max_temperature": max_temp,
+        "min_temperature": min_temp,
+        "temperature_swing": temperature_swing,
+        "is_hot_day": max_temp > 30 if max_temp is not None else False,
+        "is_windy_day": wind_speed > 10,
+        "is_uncomfortable_day": humidity > 80 and max_temp > 28,
+        "is_rainy_day": precipitation > 0,
+        "weather_description": day.get("weather_description", ""),
+        "precipitation": precipitation
     }
 
-
 def generate_daily_report(analysis):
-    """
-    Generate a detailed report based on the analysis results for a single day.
+    """Generate a human-readable daily weather report."""
+    max_temp = analysis.get("max_temperature", "N/A")
+    min_temp = analysis.get("min_temperature", "N/A")
+    precipitation = analysis.get("precipitation", 0.0)
 
-    Args:
-        analysis (dict): The analysis results for the day.
-
-    Returns:
-        str: A detailed report as a string.
-    """
-    lines = [
-        f"Date: {analysis['date']}",
-        f"Weather: {analysis['weather_description']}",
-        f"Temperature: Max {analysis['max_temperature']}°C",
+    report_lines = [
+        f"Date: {analysis.get('date', 'Unknown')}",
+        f"Weather: {analysis.get('weather_description', '')}",
+        f"Temperature: Max {max_temp}°C, Min {min_temp}°C",
+        f"Temperature swing: {analysis.get('temperature_swing', 'N/A')}°C",
+        f"Hot day: {'Yes' if analysis.get('is_hot_day') else 'No'}",
+        f"Windy day: {'Yes' if analysis.get('is_windy_day') else 'No'}",
+        f"Rainy day: {'Yes' if analysis.get('is_rainy_day') else 'No'}",
+        f"Uncomfortable day: {'Yes' if analysis.get('is_uncomfortable_day') else 'No'}",
+        f"Precipitation: {precipitation if precipitation > 0 else 'no precipitation'}"
     ]
-
-    if analysis["max_temperature"] > 30:
-        lines.append("It was a hot day.")
-    if analysis["wind_speed"] > 15:
-        lines.append("It was a windy day.")
-    if analysis["humidity"] > 70:
-        lines.append("The humidity made the day uncomfortable.")
-    if analysis["precipitation"] > 0:
-        lines.append("It was a rainy day.")
-    else:
-        lines.append("There was no precipitation.")
-
-    return "\n".join(lines)
+    return "\n".join(report_lines)
 
 
 def summarize_weather_analysis(analyses):
-    """
-    Summarize the weather analysis over multiple days.
+    """Summarize multiple days of weather analysis."""
+    hottest = max(analyses, key=lambda d: d["max_temperature"] if d["max_temperature"] is not None else float('-inf'))
+    windiest = max(analyses, key=lambda d: d.get("wind_speed", 0))
+    rainiest = max(analyses, key=lambda d: d.get("precipitation", 0))
+    most_humid = max(analyses, key=lambda d: d.get("humidity", 0))
 
-    Args:
-        analyses (list of dict): A list of daily analysis results.
+    return {
+        "Hottest day": hottest["date"],
+        "Windiest day": windiest["date"],
+        "Rainiest day": rainiest["date"],
+        "Most humid day": most_humid["date"],
+        "average_temp_swing": sum(d["temperature_swing"] for d in analyses if d["temperature_swing"] is not None) / len(analyses)
+    }
 
-    Returns:
-        str: A summary report as a string.
-    """
-    hottest = max(analyses, key=lambda d: d["max_temperature"])
-    windiest = max(analyses, key=lambda d: d["wind_speed"])
-    most_humid = max(analyses, key=lambda d: d["humidity"])
-    rainiest = max(analyses, key=lambda d: d["precipitation"])
-
-    return (
-        "\nWeather Summary:\n"
-        f"Hottest day: {hottest['date']} with a maximum temperature of {hottest['max_temperature']}°C\n"
-        f"Windiest day: {windiest['date']} with wind speeds of {windiest['wind_speed']} km/h\n"
-        f"Most humid day: {most_humid['date']} with a humidity level of {most_humid['humidity']}%\n"
-        f"Rainiest day: {rainiest['date']} with {rainiest['precipitation']} mm of precipitation"
-    )
 
 
 if __name__ == "__main__":

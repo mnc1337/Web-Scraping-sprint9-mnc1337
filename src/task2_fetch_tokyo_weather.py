@@ -3,12 +3,6 @@ import json
 
 
 def fetch_weather_data():
-    """
-    Fetch the maximum temperature forecast for Tokyo using the Open-Meteo API.
-
-    Returns:
-        dict: A dictionary containing the date and the maximum temperature.
-    """
     url = "https://api.open-meteo.com/v1/forecast?latitude=35.6895&longitude=139.6917&daily=temperature_2m_max&timezone=Asia/Tokyo"
     response = requests.get(url)
 
@@ -28,13 +22,6 @@ def fetch_weather_data():
 
 
 def save_to_json(data, filename):
-    """
-    Save the extracted weather data to a JSON file.
-
-    Args:
-        data (dict): The data to be saved.
-        filename (str): The name of the JSON file.
-    """
     with open(filename, "w") as file:
         json.dump(data, file, indent=4)
 
