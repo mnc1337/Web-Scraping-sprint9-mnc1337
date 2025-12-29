@@ -14,7 +14,10 @@ def summarize_weather_data(daily_data):
         "average_min_temp": sum(d["min_temperature"] for d in daily_data) / total_days,
         "total_precipitation": sum(d["precipitation"] for d in daily_data),
         "average_wind_speed": sum(d["wind_speed"] for d in daily_data) / total_days,
-        "average_humidity": sum(d["humidity"] for d in daily_data) / total_days
+        "average_humidity": sum(d["humidity"] for d in daily_data) / total_days,
+        "hot_days": sum(1 for d in daily_data if d["max_temperature"] > 30),
+        "windy_days": sum(1 for d in daily_data if d["wind_speed"] > 15),
+        "rainy_days": sum(1 for d in daily_data if d["precipitation"] > 0),
     }
 
 
@@ -22,20 +25,42 @@ def export_to_csv(daily_data, file_path):
     if not daily_data:
         return
 
-    fieldnames = [k.replace("_", " ").title() for k in daily_data[0].keys()]
+    fieldnames = [
+        "Date",
+        "Max Temperature",
+        "Min Temperature",
+        "Precipitation",
+        "Wind Speed",
+        "Humidity",
+        "Weather Description",
+        "Is Hot Day",
+        "Is Windy Day",
+        "Is Rainy Day",
+    ]
+
+    def write(writer):
+        writer.writeheader()
+        for d in daily_data:
+            writer.writerow({
+                "Date": d["date"],
+                "Max Temperature": d["max_temperature"],
+                "Min Temperature": d["min_temperature"],
+                "Precipitation": d["precipitation"],
+                "Wind Speed": d["wind_speed"],
+                "Humidity": d["humidity"],
+                "Weather Description": d["weather_description"],
+                "Is Hot Day": d["max_temperature"] > 30,
+                "Is Windy Day": d["wind_speed"] > 15,
+                "Is Rainy Day": d["precipitation"] > 0,
+            })
 
     if isinstance(file_path, str):
-        with open(file_path, 'w', newline='', encoding='utf-8') as f:
+        with open(file_path, "w", newline="", encoding="utf-8") as f:
             writer = csv.DictWriter(f, fieldnames=fieldnames)
-            writer.writeheader()
-            for row in daily_data:
-                writer.writerow(row)
+            write(writer)
     else:
         writer = csv.DictWriter(file_path, fieldnames=fieldnames)
-        writer.writeheader()
-        for row in daily_data:
-            writer.writerow(row)
-
+        write(writer)
 
 
 if __name__ == "__main__":
