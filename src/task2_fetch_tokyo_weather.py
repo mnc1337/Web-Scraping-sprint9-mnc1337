@@ -6,19 +6,13 @@ def fetch_weather_data():
     url = "https://api.open-meteo.com/v1/forecast?latitude=35.6895&longitude=139.6917&daily=temperature_2m_max&timezone=Asia/Tokyo"
     response = requests.get(url)
 
-    json_data = response.json()
-    date = json_data["daily"]["time"][0]
-    temps = json_data["daily"]["temperature_2m_max"]
-    max_temp = max(temps)
-
-    result = {
-        "date": date,
-        "max_temperature": max_temp,
-    }
-    
     response.raise_for_status()
 
-    return result
+    json_data = response.json()
+    return {
+        "date": json_data["daily"]["time"][0],
+        "max_temperature": json_data["daily"]["temperature_2m_max"][0],
+    }
 
 
 def save_to_json(data, filename):
